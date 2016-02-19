@@ -5,9 +5,6 @@ import com.google.gson.annotations.SerializedName;
 
 public class APS
 {
-
-
-
     @Expose
     public String yco;
     @Expose
