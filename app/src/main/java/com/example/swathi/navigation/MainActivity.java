@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     Values v = new Values();
     double A = -32;
     float xi = 0, yi = 0;
-    int i,cend=3;
+    double n;
 
     Button setWifi; // WiFi Toggle Button
     TextView T1, T2;
@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
     WifiReceiver receiverWifi;
     List<ScanResult> wifiList; //List of APs scanned
     List<String> listOfProvider;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,14 +58,17 @@ public class MainActivity extends AppCompatActivity {
                 if (wifiManager.isWifiEnabled()) {
                     wifiManager.setWifiEnabled(false);
                     setWifi.setText("OFF");
+                }
 
-                } else if (!wifiManager.isWifiEnabled()) {
+                else {
                     wifiManager.setWifiEnabled(true);
                     setWifi.setText("ON");
                     scanning();
                 }
             }
         });
+
+//        imageView.getDrawable();
 
         T1 = (TextView) findViewById(R.id.textView4);
         T2 = (TextView) findViewById(R.id.textView5);
@@ -77,6 +79,8 @@ public class MainActivity extends AppCompatActivity {
             setWifi.setText("ON");
             scanning();
         }
+
+//        Draw();
     }
 
     private void scanning() {
@@ -125,37 +129,21 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Too few APs available", Toast.LENGTH_LONG).show();
             }
             else {
-                for (i = 0; i < cend; i++) {
+                for (int i = 0; i < 3; i++) {
 
                     BSSID[i] = sortedMap.get("twdata").get(i).BSSID.toString();
                     RSSI[i] = sortedMap.get("twdata").get(i).level;
-
-                    // Correct RSSI for LoS APs
-//                if(RSSI[i]>-40)
-//                    RSSI[i]=-40;
-
-//                v.d[i]=0.139*calcD(RSSI[i], sortedMap.get("twdata").get(i).frequency);
-                    v.d[i] = 0.14 * Math.pow(10, ((A - RSSI[i]) / (10 * 2)));
-
-//                v.d[i]=calculateDistance(RSSI[i],sortedMap.get("twdata").get(i).frequency);
-//                v.d[i] = 0.139 * Math.exp( 2.34*(A-RSSI[i]) / (10 * 2.4));
-//                Toast.makeText(getApplicationContext(), String.valueOf(v.d[i]),Toast.LENGTH_LONG).show();
-
-                    xyfrombssid(BSSID[i]);
+                    if(RSSI[i]>-50) n=2;
+                    else n=2.5;
+                    v.d[i] = 0.14 * Math.pow(10, ((A - RSSI[i]) / (10 * n)));
+                    xyfrombssid(BSSID[i],i);
                 }
             }
-//            float u = (float) ((Math.pow(v.d[2], 2) - Math.pow(v.d[3], 2) - Math.pow(v.x[2], 2) + Math.pow(v.x[3], 2) - Math.pow(v.y[2], 2) + Math.pow(v.y[3], 2)) / 2);
-//            float v1 = (float) ((Math.pow(v.d[2], 2) - Math.pow(v.d[1], 2) - Math.pow(v.x[2], 2) + Math.pow(v.x[1], 2) - Math.pow(v.y[2], 2) + Math.pow(v.y[1], 2)) / 2);
-//
-//            yi = (u * (v.x[3] - v.x[2]) - v1 * (v.x[1] - v.x[2])) / (((v.y[1] - v.y[2]) * (v.x[3] - v.x[2])) - ((v.y[3] - v.y[2]) * (v.x[1] - v.x[2])));
-//            xi = (u - yi * (v.y[3] - v.y[2])) / (v.x[3] - v.x[2]);
-
-
         }
     }
 
-    private void xyfrombssid(String id) {
-        String URL = "http://10.132.125.49:3000/AP/" + id;
+    private void xyfrombssid(String id, final int i) {
+        String URL = "http://10.132.126.53:3000/AP/" + id;
         Ion.with(this)
                 .load(URL)
                 .asJsonObject()
@@ -169,7 +157,6 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         if (result.has("error")) {
-                            cend++;
                             return;
                         }
 
@@ -177,17 +164,24 @@ public class MainActivity extends AppCompatActivity {
                         v.y[i] = result.get("yco").getAsFloat();
 
                         if (i == 2) {
+//                            double d1=(Math.sqrt(Math.abs(Math.pow(v.x[0]-v.x[1],2)+Math.pow(v.y[0]-v.y[1],2))))-(v.d[0]+v.d[1]);
+//                            double d2=(Math.sqrt(Math.abs(Math.pow(v.x[0]-v.x[2],2)+Math.pow(v.y[0]-v.y[2],2))))-(v.d[0]+v.d[2]);
+//                            double d3=(Math.sqrt(Math.abs(Math.pow(v.x[2]-v.x[1],2)+Math.pow(v.y[2]-v.y[1],2))))-(v.d[2]+v.d[1]);
+//                            double d=Math.min(d1,Math.min(d2,d3));
+//                            for(int i=0; i<3;i++)
+//                                v.d[i]+=d;
+
                             getres();
                             /* Calculate co-ordinates based on d1,d2,d3; x1,x2,x3; y1,y2,y3 */
                         }
                     }
                 });
-    }
+    } //GET calls
 
     private void getres() {
 
         Ion.with(this)
-                .load("http://10.132.125.49:3000/CAl")
+                .load("http://10.132.126.53:3000/CAl")
                 .setJsonPojoBody(v)
                 .asJsonObject()
                 .setCallback(new FutureCallback<JsonObject>() {
@@ -216,18 +210,7 @@ public class MainActivity extends AppCompatActivity {
                         T2.setText(String.valueOf(yi));
                     }
                 });
-    }
-
-//    public double calculateDistance(double levelInDb, double freqInMHz) {
-//        double exp = (27.55 - (20 * Math.log10(freqInMHz)) + Math.abs(levelInDb)) / 20.0;
-//        return 0.14*Math.pow(10.0, exp);
-//    }
-//
-//    public double calcD(int lvl, int freq) {
-//        double n = (lvl-11+20*Math.log10(freq))/31;
-//        return Math.pow(10, n);
-//    }
-
+    } //triangulation
 }
 
 

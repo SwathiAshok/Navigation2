@@ -8,9 +8,17 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.swathi.navigation.MainActivity"
-    android:clickable="false"
-    android:background="@android:color/background_light"
-    android:visibility="visible">
+    android:clickable="true"
+    android:background="@drawable/b2f2"
+    android:visibility="visible"
+    android:focusableInTouchMode="true"
+    android:focusable="true"
+    android:contextClickable="true"
+    android:layoutMode="opticalBounds"
+    android:longClickable="false"
+    android:nestedScrollingEnabled="true"
+    android:touchscreenBlocksFocus="false"
+    android:transitionGroup="false">
 
     <ToggleButton
         android:id="@+id/btn_wifi"
@@ -19,8 +27,7 @@
         android:text="OFF"
         android:checked="false"
         android:layout_alignParentTop="true"
-        android:layout_alignRight="@+id/textView4"
-        android:layout_alignEnd="@+id/textView4" />
+        android:layout_centerHorizontal="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -36,34 +43,14 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="x="
-        android:textColor="@color/material_blue_grey_800"
-        android:id="@+id/textView2"
-        android:layout_below="@+id/textView"
-        android:layout_toStartOf="@+id/textView"
-        android:layout_marginTop="44dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="y="
-        android:textColor="@color/material_blue_grey_800"
-        android:id="@+id/textView3"
-        android:layout_centerVertical="true"
-        android:layout_alignLeft="@+id/textView2"
-        android:layout_alignStart="@+id/textView2" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="Small Text"
         android:textColor="@color/material_blue_grey_800"
         android:id="@+id/textView4"
-        android:layout_alignBottom="@+id/textView2"
-        android:layout_centerHorizontal="true" />
+        android:layout_below="@+id/textView"
+        android:layout_toLeftOf="@+id/btn_wifi"
+        android:layout_toStartOf="@+id/btn_wifi"
+        android:layout_marginTop="64dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -72,7 +59,27 @@
         android:text="Small Text"
         android:textColor="@color/material_blue_grey_800"
         android:id="@+id/textView5"
-        android:layout_alignBottom="@+id/textView3"
-        android:layout_alignStart="@+id/textView4" />
+        android:layout_alignTop="@+id/textView4"
+        android:layout_toRightOf="@+id/textView"
+        android:layout_toEndOf="@+id/textView" />
 
+    <!--<ImageView-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/imageView"-->
+        <!--android:src="@drawable/b"-->
+        <!--android:visibility="visible"-->
+        <!--android:scaleType="fitXY"-->
+        <!--android:nestedScrollingEnabled="true"-->
+        <!--android:longClickable="false"-->
+        <!--android:focusableInTouchMode="true"-->
+        <!--android:focusable="true"-->
+        <!--android:cropToPadding="false"-->
+        <!--android:contextClickable="true"-->
+        <!--android:clickable="true"-->
+        <!--android:baselineAlignBottom="false"-->
+        <!--android:layout_below="@+id/textView4"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_alignParentStart="true"-->
+        <!--android:layout_marginTop="68dp" />-->
 </RelativeLayout>
