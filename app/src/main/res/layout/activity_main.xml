@@ -1,85 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.swathi.navigation.MainActivity"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/layout"
+
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.swathi.navigation.MainActivity"
+
     android:clickable="true"
-    android:background="@drawable/b2f2"
     android:visibility="visible"
     android:focusableInTouchMode="true"
-    android:focusable="true"
-    android:contextClickable="true"
-    android:layoutMode="opticalBounds"
-    android:longClickable="false"
-    android:nestedScrollingEnabled="true"
-    android:touchscreenBlocksFocus="false"
-    android:transitionGroup="false">
+    android:focusable="true">
 
     <ToggleButton
         android:id="@+id/btn_wifi"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="OFF"
+        android:text="@string/btn_wifi"
         android:checked="false"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 
-    <TextView
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/imageButton"
+        android:layout_below="@+id/btn_wifi"
+        android:layout_centerHorizontal="true" />
+
+
+    <Button
+        android:layout_width="64dip"
+        android:layout_height="64dip"
+        android:text="@string/cb"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/tileView"
+        android:layout_alignEnd="@+id/tileView"
+        android:clickable="true"
+        android:id="@+id/cb"
+        android:theme="@style/Base.Animation.AppCompat.DropDownUp" />
+
+    <com.qozix.tileview.TileView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/tileView"
+        android:layout_alignParentBottom="true"
+        android:layout_alignLeft="@+id/button"
+        android:layout_alignStart="@+id/button"
+        android:layout_alignTop="@+id/btn_wifi" />
+
+    <Button
+        style="@style/Base.Widget.AppCompat.Button.Borderless"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/material_blue_grey_800"
-        android:text="You are here"
-        android:id="@+id/textView"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="65dp" />
+        android:text="@string/button"
+        android:id="@+id/button"
+        android:visibility="gone"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignTop="@+id/cb"
+        android:layout_centerHorizontal="true" />
 
-    <TextView
-        android:layout_width="wrap_content"
+    <Spinner
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Small Text"
-        android:textColor="@color/material_blue_grey_800"
-        android:id="@+id/textView4"
-        android:layout_below="@+id/textView"
-        android:layout_toLeftOf="@+id/btn_wifi"
-        android:layout_toStartOf="@+id/btn_wifi"
-        android:layout_marginTop="64dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Small Text"
-        android:textColor="@color/material_blue_grey_800"
-        android:id="@+id/textView5"
-        android:layout_alignTop="@+id/textView4"
-        android:layout_toRightOf="@+id/textView"
-        android:layout_toEndOf="@+id/textView" />
-
-    <!--<ImageView-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:id="@+id/imageView"-->
-        <!--android:src="@drawable/b"-->
-        <!--android:visibility="visible"-->
-        <!--android:scaleType="fitXY"-->
-        <!--android:nestedScrollingEnabled="true"-->
-        <!--android:longClickable="false"-->
-        <!--android:focusableInTouchMode="true"-->
-        <!--android:focusable="true"-->
-        <!--android:cropToPadding="false"-->
-        <!--android:contextClickable="true"-->
-        <!--android:clickable="true"-->
-        <!--android:baselineAlignBottom="false"-->
-        <!--android:layout_below="@+id/textView4"-->
-        <!--android:layout_alignParentLeft="true"-->
-        <!--android:layout_alignParentStart="true"-->
-        <!--android:layout_marginTop="68dp" />-->
+        android:id="@+id/spinner"
+        android:layout_alignBottom="@+id/tileView"
+        android:layout_toLeftOf="@+id/cb"
+        android:layout_toStartOf="@+id/cb"
+        android:layout_alignTop="@+id/cb"
+        android:visibility="gone" />
 </RelativeLayout>
+

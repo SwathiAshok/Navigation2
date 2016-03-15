@@ -10,12 +10,14 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
+import com.qozix.tileview.TileView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,35 +26,45 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static android.view.View.INVISIBLE;
+import static android.view.View.OnClickListener;
+import static android.view.View.VISIBLE;
+import static com.example.swathi.navigation.R.id;
+
 public class MainActivity extends AppCompatActivity {
 
-    String[] BSSID = new String[3];
-    int[] RSSI = new int[3];
-    Values v = new Values();
-    double A = -32;
-    float xi = 0, yi = 0;
-    double n;
+    private Values v = new Values();
+    private final double A = -32;
+    private double n;
+    private float xi = 0, yi = 0;
+    String S= "";
 
     Button setWifi; // WiFi Toggle Button
-    TextView T1, T2;
     WifiManager wifiManager;
     WifiReceiver receiverWifi;
     List<ScanResult> wifiList; //List of APs scanned
     List<String> listOfProvider;
+    Button circleButton;
+    Button B1;
+    TileView tileview;
+    Spinner spinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        tileview=(TileView)findViewById(id.tileView);
+        tileview.setSize(3349, 6000);
+        tileview.addDetailLevel(1f, "b2f2.png", 3349, 6000);
 
         listOfProvider = new ArrayList<>();
 
         wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         receiverWifi = new WifiReceiver();
 
-        setWifi = (Button) findViewById(R.id.btn_wifi);
-        setWifi.setOnClickListener(new View.OnClickListener() {
+        setWifi = (Button) findViewById(id.btn_wifi);
+        setWifi.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (wifiManager.isWifiEnabled()) {
@@ -68,11 +80,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//        imageView.getDrawable();
-
-        T1 = (TextView) findViewById(R.id.textView4);
-        T2 = (TextView) findViewById(R.id.textView5);
-
         wifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
 
         if (wifiManager.isWifiEnabled()) {
@@ -80,7 +87,31 @@ public class MainActivity extends AppCompatActivity {
             scanning();
         }
 
-//        Draw();
+        circleButton= (Button) findViewById(id.cb);
+        B1= (Button) findViewById(id.button);
+//        spinner=(Spinner) findViewById(id.spinner);
+
+        circleButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                circleButton.setVisibility(INVISIBLE);
+                B1.setVisibility(VISIBLE);
+//                spinner.setVisibility(VISIBLE);
+            }
+        });
+
+
+
+
+        B1.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                B1.setVisibility(INVISIBLE);
+                circleButton.setVisibility(VISIBLE);
+                spinner.setVisibility(INVISIBLE);
+
+            }
+        });
     }
 
     private void scanning() {
@@ -98,6 +129,8 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         super.onResume();
     }
+
+
 
     class WifiReceiver extends BroadcastReceiver {
 
@@ -131,19 +164,19 @@ public class MainActivity extends AppCompatActivity {
             else {
                 for (int i = 0; i < 3; i++) {
 
-                    BSSID[i] = sortedMap.get("twdata").get(i).BSSID.toString();
-                    RSSI[i] = sortedMap.get("twdata").get(i).level;
-                    if(RSSI[i]>-50) n=2;
+                    v.BSSID[i] = sortedMap.get("twdata").get(i).BSSID;
+                    v.RSSI[i] = sortedMap.get("twdata").get(i).level;
+                    if(v.RSSI[i]>-50) n=2;
                     else n=2.5;
-                    v.d[i] = 0.14 * Math.pow(10, ((A - RSSI[i]) / (10 * n)));
-                    xyfrombssid(BSSID[i],i);
+                    v.d[i] = 0.14 * Math.pow(10, ((A - v.RSSI[i]) / (10 * n)));
+                    xyfrombssid(v.BSSID[i],i);
                 }
             }
         }
     }
 
     private void xyfrombssid(String id, final int i) {
-        String URL = "http://10.132.126.53:3000/AP/" + id;
+        String URL = "http://10.132.124.230:3000/AP/" + id;
         Ion.with(this)
                 .load(URL)
                 .asJsonObject()
@@ -164,13 +197,6 @@ public class MainActivity extends AppCompatActivity {
                         v.y[i] = result.get("yco").getAsFloat();
 
                         if (i == 2) {
-//                            double d1=(Math.sqrt(Math.abs(Math.pow(v.x[0]-v.x[1],2)+Math.pow(v.y[0]-v.y[1],2))))-(v.d[0]+v.d[1]);
-//                            double d2=(Math.sqrt(Math.abs(Math.pow(v.x[0]-v.x[2],2)+Math.pow(v.y[0]-v.y[2],2))))-(v.d[0]+v.d[2]);
-//                            double d3=(Math.sqrt(Math.abs(Math.pow(v.x[2]-v.x[1],2)+Math.pow(v.y[2]-v.y[1],2))))-(v.d[2]+v.d[1]);
-//                            double d=Math.min(d1,Math.min(d2,d3));
-//                            for(int i=0; i<3;i++)
-//                                v.d[i]+=d;
-
                             getres();
                             /* Calculate co-ordinates based on d1,d2,d3; x1,x2,x3; y1,y2,y3 */
                         }
@@ -179,9 +205,8 @@ public class MainActivity extends AppCompatActivity {
     } //GET calls
 
     private void getres() {
-
         Ion.with(this)
-                .load("http://10.132.126.53:3000/CAl")
+                .load("http://10.132.124.230:3000/CAl")
                 .setJsonPojoBody(v)
                 .asJsonObject()
                 .setCallback(new FutureCallback<JsonObject>() {
@@ -195,22 +220,46 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
 
-                        if(!Double.isNaN(xi)) {
-                            if(!Double.isNaN(yi)) {
+                        if (!Double.isNaN(xi)) {
+                            if (!Double.isNaN(yi)) {
                                 xi = result.get("xi").getAsFloat();
                                 yi = result.get("yi").getAsFloat();
-                            }
-                            else xi= (float) 0.0;
+                            } else xi = (float) 0.0;
+                        } else {
+                            yi = (float) 0.0;
                         }
-                        else {
-                            yi= (float) 0.0;
-                        }
-
-                        T1.setText(String.valueOf(xi));
-                        T2.setText(String.valueOf(yi));
+                        placeMarker(xi, yi);
                     }
                 });
     } //triangulation
+
+    private void findloc(String s) {
+
+    String URL = "http://10.132.126.151:3000/LOC/" + s;
+    Ion.with(this)
+            .load(URL)
+            .asJsonObject()
+            .setCallback(new FutureCallback<JsonObject>() {
+                @Override
+                public void onCompleted(Exception e, JsonObject result) {
+                    if (e != null) {
+                        Toast.makeText(getApplicationContext(), "Error in GET", Toast.LENGTH_LONG).show();
+                        System.out.println("Error in GET");
+                        return;
+                    }
+
+                    if (result.has("error")) {
+                        return;
+                    }
+
+                    placeMarker(result.get("xco").getAsFloat(), result.get("yco").getAsFloat());
+                }
+            });
 }
 
-
+    private void placeMarker(float x, float y) {
+        ImageView marker = new ImageView( this );
+        marker.setImageResource(R.drawable.images);
+        tileview.addMarker(marker,x, y,1.0f,1.0f);
+    }
+}
