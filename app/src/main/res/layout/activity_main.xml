@@ -69,14 +69,5 @@
         android:layout_alignTop="@+id/cb"
         android:layout_centerHorizontal="true" />
 
-    <Spinner
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/spinner"
-        android:layout_alignBottom="@+id/tileView"
-        android:layout_toLeftOf="@+id/cb"
-        android:layout_toStartOf="@+id/cb"
-        android:layout_alignTop="@+id/cb"
-        android:visibility="gone" />
 </RelativeLayout>
 

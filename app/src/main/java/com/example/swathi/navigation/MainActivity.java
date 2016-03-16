@@ -11,7 +11,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.gson.JsonObject;
@@ -37,17 +36,15 @@ public class MainActivity extends AppCompatActivity {
     private final double A = -32;
     private double n;
     private float xi = 0, yi = 0;
-    String S= "";
 
-    Button setWifi; // WiFi Toggle Button
     WifiManager wifiManager;
     WifiReceiver receiverWifi;
     List<ScanResult> wifiList; //List of APs scanned
     List<String> listOfProvider;
-    Button circleButton;
-    Button B1;
+    Button circleButton, B1, setWifi;
     TileView tileview;
-    Spinner spinner;
+    ImageView marker;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
         tileview=(TileView)findViewById(id.tileView);
         tileview.setSize(3349, 6000);
         tileview.addDetailLevel(1f, "b2f2.png", 3349, 6000);
+        marker= new ImageView(this);
+        marker.setImageResource(R.drawable.images);
 
         listOfProvider = new ArrayList<>();
 
@@ -87,29 +86,24 @@ public class MainActivity extends AppCompatActivity {
             scanning();
         }
 
+
+
         circleButton= (Button) findViewById(id.cb);
         B1= (Button) findViewById(id.button);
-//        spinner=(Spinner) findViewById(id.spinner);
 
         circleButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 circleButton.setVisibility(INVISIBLE);
                 B1.setVisibility(VISIBLE);
-//                spinner.setVisibility(VISIBLE);
             }
         });
-
-
-
 
         B1.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 B1.setVisibility(INVISIBLE);
                 circleButton.setVisibility(VISIBLE);
-                spinner.setVisibility(INVISIBLE);
-
             }
         });
     }
@@ -129,8 +123,6 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         super.onResume();
     }
-
-
 
     class WifiReceiver extends BroadcastReceiver {
 
@@ -155,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-
             listOfProvider.clear();
 
             if(sortedMap.get("twdata").size()<3) {
@@ -176,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void xyfrombssid(String id, final int i) {
-        String URL = "http://10.132.124.230:3000/AP/" + id;
+        String URL = "http://10.132.126.70:3000/AP/" + id;
         Ion.with(this)
                 .load(URL)
                 .asJsonObject()
@@ -206,14 +197,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void getres() {
         Ion.with(this)
-                .load("http://10.132.124.230:3000/CAl")
+                .load("http://10.132.126.70:3000/CAl")
                 .setJsonPojoBody(v)
                 .asJsonObject()
                 .setCallback(new FutureCallback<JsonObject>() {
                     @Override
                     public void onCompleted(Exception e, JsonObject result) {
-//                        Toast.makeText(getApplicationContext(), "Calling", Toast.LENGTH_LONG).show();
-                        // do stuff with the result or error
                         if (e != null) {
                             Toast.makeText(getApplicationContext(), "Error in POST", Toast.LENGTH_LONG).show();
                             System.out.println("Error in POST");
@@ -224,42 +213,41 @@ public class MainActivity extends AppCompatActivity {
                             if (!Double.isNaN(yi)) {
                                 xi = result.get("xi").getAsFloat();
                                 yi = result.get("yi").getAsFloat();
+                                tileview.addMarker(marker, xi, yi, tileview.getPivotX(), tileview.getPivotY());
                             } else xi = (float) 0.0;
                         } else {
                             yi = (float) 0.0;
                         }
-                        placeMarker(xi, yi);
+
+                        System.out.println("marker");
                     }
                 });
     } //triangulation
 
-    private void findloc(String s) {
-
-    String URL = "http://10.132.126.151:3000/LOC/" + s;
-    Ion.with(this)
-            .load(URL)
-            .asJsonObject()
-            .setCallback(new FutureCallback<JsonObject>() {
-                @Override
-                public void onCompleted(Exception e, JsonObject result) {
-                    if (e != null) {
-                        Toast.makeText(getApplicationContext(), "Error in GET", Toast.LENGTH_LONG).show();
-                        System.out.println("Error in GET");
-                        return;
-                    }
-
-                    if (result.has("error")) {
-                        return;
-                    }
-
-                    placeMarker(result.get("xco").getAsFloat(), result.get("yco").getAsFloat());
-                }
-            });
-}
-
-    private void placeMarker(float x, float y) {
-        ImageView marker = new ImageView( this );
-        marker.setImageResource(R.drawable.images);
-        tileview.addMarker(marker,x, y,1.0f,1.0f);
-    }
+//    private void findloc(String s) {
+//
+//    String URL = "http://10.132.126.70:3000/LOC/" + s;
+//    Ion.with(this)
+//            .load(URL)
+//            .asJsonObject()
+//            .setCallback(new FutureCallback<JsonObject>() {
+//                @Override
+//                public void onCompleted(Exception e, JsonObject result) {
+//                    if (e != null) {
+//                        Toast.makeText(getApplicationContext(), "Error in GET", Toast.LENGTH_LONG).show();
+//                        System.out.println("Error in GET");
+//                        return;
+//                    }
+//
+//                    if (result.has("error")) {
+//                        return;
+//                    }
+//
+//                    marker.setImageResource(R.drawable.images);
+//                    tileview.addMarker(marker, result.get("xco").getAsFloat(), result.get("yco").getAsFloat(), tileview.getPivotX(), tileview.getPivotY());
+//                }
+//            });
+//}
+//
+//    private void placeMarker(float x, float y) {
 }
