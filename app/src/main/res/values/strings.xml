@@ -4,4 +4,6 @@
     <string name="button">OK</string>
     <string name="cb">GO</string>
     <string name="btn_wifi">OFF</string>
+    <string name="RB">GO</string>
+    <string name="E1">Room Name</string>
 </resources>

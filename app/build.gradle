@@ -2,12 +2,12 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    buildToolsVersion '23.0.2'
 
     defaultConfig {
         applicationId "com.example.navigation"
         minSdkVersion 16
-        targetSdkVersion 23
+        targetSdkVersion 22
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -25,6 +25,5 @@ dependencies {
     compile 'com.koushikdutta.ion:ion:2.+'
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.0'
     compile 'com.qozix:tileview:2.0.10'
-    compile 'com.github.manuelpeinado.imagelayout:imagelayout:1.1.0'
-    compile 'com.github.markushi:circlebutton:1.1'
+    compile 'com.android.support:design:23.1.1'
 }

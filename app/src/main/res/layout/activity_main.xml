@@ -35,18 +35,6 @@
         android:layout_below="@+id/btn_wifi"
         android:layout_centerHorizontal="true" />
 
-
-    <Button
-        android:layout_width="64dip"
-        android:layout_height="64dip"
-        android:text="@string/cb"
-        android:layout_alignParentBottom="true"
-        android:layout_alignRight="@+id/tileView"
-        android:layout_alignEnd="@+id/tileView"
-        android:clickable="true"
-        android:id="@+id/cb"
-        android:theme="@style/Base.Animation.AppCompat.DropDownUp" />
-
     <com.qozix.tileview.TileView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -66,8 +54,28 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_alignTop="@+id/cb"
         android:layout_centerHorizontal="true" />
+
+   <Button
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:id="@+id/rb"
+       android:text="@string/RB"
+       android:layout_alignParentBottom="true"
+       android:layout_alignParentRight="true"
+       android:layout_alignParentEnd="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:text="@string/E1"
+        android:visibility="gone"
+        android:ems="10"
+        android:id="@+id/editText"
+        android:layout_alignTop="@+id/rb"
+        android:layout_toLeftOf="@+id/rb"
+        android:layout_toStartOf="@+id/rb" />
 
 </RelativeLayout>
 
