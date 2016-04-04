@@ -6,4 +6,11 @@
     <string name="btn_wifi">OFF</string>
     <string name="RB">GO</string>
     <string name="E1">Room Name</string>
+    <string name="Majestic">Majestic</string>
+    <string name="GlaciarBay">Glaciar Bay</string>
+    <string name="CubbonPArk">Cubbon Park</string>
+    <string name="Oval">Oval</string>
+    <string name="Fujian">Fujian Tulou</string>
+    <string name="Half">Half Dome</string>
+    <string name="OK">OK</string>
 </resources>

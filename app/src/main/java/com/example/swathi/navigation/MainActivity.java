@@ -1,19 +1,26 @@
 package com.example.swathi.navigation;
 
+import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
+import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.google.gson.JsonObject;
@@ -28,30 +35,31 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static android.view.View.VISIBLE;
-import static com.example.swathi.navigation.R.id;
+import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
 
     private Values v = new Values();
-    vertex[] V = new vertex[31];
-
+    double[] vx=new double[31];
+    double[] vy=new double[31];
     private final double A = -32;
     private double n;
-    private float xi = 0, yi = 0;
+    private float xid = 0, yid=0;
     final findpath f = new findpath();
+    String url="http://10.132.126.220:3000/";
 
-
-    String url="http://10.132.125.91:3000/";
-
+    Timer T=new Timer();
     WifiManager wifiManager;
     WifiReceiver receiverWifi;
-    List<ScanResult> wifiList; //List of APs scanned
+    List<ScanResult> wifiList;
     List<String> listOfProvider;
-    Button room, B1, setWifi;
-    EditText e1;
     TileView t;
+    FloatingActionButton fab;
+    RadioGroup radioGroup;
+    String S;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +67,48 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        t=(TileView)findViewById(id.tileView);
+        fab= (FloatingActionButton) findViewById(R.id.fb);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+                                   @Override
+                                   public void onClick(View v) {
+
+                                       setContentView(R.layout.fab);
+
+                                       radioGroup = (RadioGroup) findViewById(R.id.myRadioGroup);
+                                       radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                                           @Override
+                                           public void onCheckedChanged(RadioGroup group, int checkedId) {
+                                               if (checkedId == R.id.radioButton)
+                                                   S="Maj";
+                                               else if(checkedId==R.id.radioButton2)
+                                                   S="Hal";
+                                               else if(checkedId==R.id.radioButton3)
+                                                   S="Fuj";
+                                               else if(checkedId==R.id.radioButton4)
+                                                   S="Ova";
+                                               else if(checkedId==R.id.radioButton5)
+                                                   S="Cub";
+                                               else
+                                                   S="Gla";
+
+                                           }
+                                       });
+
+                                       Button B1=(Button)findViewById(R.id.B1);
+                                       B1.setOnClickListener(new View.OnClickListener() {
+                                           @Override
+                                           public void onClick(View v) {
+                                               setContentView(R.layout.activity_main);
+                                               findloc(S);
+                                           }
+                                       });
+                                   }
+                               });
+
+
+
+        t=(TileView)findViewById(R.id.tileView);
         t.setSize(getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels);
         t.addDetailLevel(1f, "b2f2.png", getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels);
 
@@ -67,53 +116,21 @@ public class MainActivity extends AppCompatActivity {
 
         wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         receiverWifi = new WifiReceiver();
+        ImageView marker = new ImageView(this);
+        marker.setImageResource(R.drawable.push_pin);
 
-        setWifi = (Button) findViewById(id.btn_wifi);
-        setWifi.setOnClickListener(new View.OnClickListener() {
+        scanning();
+        T.schedule(new TimerTask() {
             @Override
-            public void onClick(View view) {
-                if (wifiManager.isWifiEnabled()) {
-                    wifiManager.setWifiEnabled(false);
-                    setWifi.setText("OFF");
-                } else {
-                    wifiManager.setWifiEnabled(true);
-                    setWifi.setText("ON");
-                    scanning();
-                }
+            public void run() {
+                scanning();
             }
-        });
+        }, 0,10000);
+
         f.floor = "b2f2";
 
         wifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
 
-        if (wifiManager.isWifiEnabled()) {
-            setWifi.setText("ON");
-            scanning();
-        }
-
-        room = (Button) findViewById(id.rb);
-        B1 = (Button) findViewById(id.button);
-        e1 = (EditText) findViewById(id.editText);
-
-        room.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                room.setVisibility(View.GONE);
-//                B1.setVisibility(View.VISIBLE);
-//                e1.setVisibility(View.VISIBLE);
-                findloc("Oval");
-            }
-        });
-
-        B1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                B1.setVisibility(View.GONE);
-                findloc(e1.getText().toString());
-                e1.setVisibility(View.GONE);
-                room.setText(VISIBLE);
-            }
-        });
     }
 
     private void scanning() {
@@ -135,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
    class WifiReceiver extends BroadcastReceiver {
 
         // This method is called when number of wifi connections is changed
+        @TargetApi(Build.VERSION_CODES.KITKAT)
         public void onReceive(Context c, Intent intent) {
 
             wifiList = wifiManager.getScanResults();
@@ -162,8 +180,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 for (int i = 0; i < 3; i++) {
 
-
-                    if(sortedMap.get("twdata").get(i).BSSID=="d8:b1:90:b2:ba:20") {
+                    if(Objects.equals(sortedMap.get("twdata").get(i).BSSID, "d8:b1:90:b2:ba:20")) {
                         v.BSSID[i] = sortedMap.get("twdata").get(4).BSSID;
                         v.RSSI[i] = sortedMap.get("twdata").get(4).level;
                     }
@@ -177,6 +194,7 @@ public class MainActivity extends AppCompatActivity {
                     else n = 2.5;
                     v.d[i] = 0.14 * Math.pow(10, ((A - v.RSSI[i]) / (10 * n)));
                     xyfrombssid(v.BSSID[i], i);
+
                 }
             }
         }
@@ -204,8 +222,7 @@ public class MainActivity extends AppCompatActivity {
                         v.y[i] = result.get("yco").getAsFloat();
 
                         if (i == 2) {
-                            getres();
-                            /* Calculate co-ordinates based on d1,d2,d3; x1,x2,x3; y1,y2,y3 */
+                            getres(); // Calculate co-ordinates based on d1,d2,d3; x1,x2,x3; y1,y2,y3
                         }
                     }
                 });
@@ -225,16 +242,17 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
 
-                        if (!Double.isNaN(xi)) {
-                            if (!Double.isNaN(yi)) {
-                                xi = result.get("xi").getAsFloat();
-                                yi = result.get("yi").getAsFloat();
-                                mark(Math.abs(result.get("xi").getAsDouble()), Math.abs(result.get("yi").getAsDouble()));
-//                                myHandler.publish(null);
-                                findloc("Oval");
-                            } else xi = (float) 0.0;
-                        } else {
-                            yi = (float) 0.0;
+                        if (!Double.isNaN(result.get("xi").getAsDouble())) {
+                            if (!Double.isNaN(result.get("yi").getAsDouble())) {
+//                                xid=183;
+//                                yid=1235;
+//                                mark(183,1235);
+//
+                                yid = 236 * Math.abs(result.get("xi").getAsFloat());
+                                xid = 236 * Math.abs(result.get("yi").getAsFloat());
+
+                                mark((double) xid, (double) yid, "S");
+                            }
                         }
                     }
                 });
@@ -259,20 +277,27 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
 
-                        mark(result.get("xco").getAsDouble(), result.get("yco").getAsDouble());
-                        path(xi, yi, result.get("xco").getAsFloat(), result.get("yco").getAsFloat());
+                        mark(result.get("xco").getAsDouble(), result.get("yco").getAsDouble(), "D");
+                        findnode(xid, yid, result.get("xco").getAsFloat(), result.get("yco").getAsFloat());
 
                     }
                 });
     }
 
-    private void mark(double y,double x) {
-        ImageView marker=new ImageView(this);
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private void mark(double x,double y, String c) {
+
+        ImageView marker = new ImageView(this);
         marker.setImageResource(R.drawable.push_pin);
-        t.addMarker(marker, 257 * x, 257 * y, -0.5f, -0.5f);
+        if(Objects.equals(c,"S")) {
+            t.addMarker(marker, x, y, -0.5f, -0.5f);
+        }
+
+        else
+            t.addMarker(marker, x, y, -0.5f, -0.5f);
     }
 
-    public void path(final float ys, final float xs, final float yd, final float xd) {
+    public void findnode(final float xs, final float ys, final float xd, final float yd) {
         Ion.with(this)
                 .load(url + "VCO")
                 .setJsonPojoBody(f)
@@ -287,41 +312,39 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         for(int i=0;i<31;i++) {
-                            V[i].x=  (result.get("xco").getAsJsonArray().get(i).getAsInt()/3.2);
-                            V[i].y=result.get("yco").getAsJsonArray().get(i).getAsInt()/3.2;
+                            vx[i]= result.get("xco").getAsJsonArray().get(i).getAsDouble();
+                            vy[i]= result.get("yco").getAsJsonArray().get(i).getAsDouble();
                         }
+
 
                         double nns, nnd;
                         int s = 0, d = 0;
 
-                        nns = finddistance(xs, ys, V[0].x, V[0].y);
+                        nns = finddistance(xs, ys, vx[0], vy[0]);
                         for (int i = 1; i < 31; i++) {
-                            if (nns > finddistance(xs, ys, V[i].x, V[i].y)) {
-                                nns = finddistance(xs, ys, V[i].x, V[i].y);
+                            if (nns > finddistance(xs, ys, vx[i], vy[i])) {
+                                nns = finddistance(xs, ys, vx[i], vy[i]);
                                 s = i;
                             }
                         }
                         f.vertex = s;
 
-                        nnd = finddistance(xd, yd, V[0].x, V[0].y);
+                        nnd = finddistance(xd, yd, vx[0], vy[0]);
                         d = 0;
                         for (int i = 1; i < 31; i++) {
-                            if (nnd > finddistance(xd, yd, V[i].x, V[i].y)) {
-                                nnd = finddistance(xd, yd, V[i].x, V[i].y);
+                            if (nnd > finddistance(xd, yd, vx[i], vy[i])) {
+                                nnd = finddistance(xd, yd, vx[i], vy[i]);
                                 d = i;
                             }
                         }
 
-                        path2(s,d);
+                        path(s, d, xd, yd);
                     }
                 });
     }
 
-    static double finddistance(float a, float b, double c, double d) {
-        return Math.abs(Math.sqrt(Math.pow(a - c, 2) + Math.pow(b - d, 2)));
-    }
 
-    void  path2(final int s, final int d) {
+    void  path(final int s, final int d, final float xd, final float yd) {
         Ion.with(this)
                 .load(url + "Vertex")
                 .setJsonPojoBody(f)
@@ -335,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
 
-                        int l = result.get("length").getAsInt();
+                        int l = 31;
                         int[] edge = new int[l];
                         for (int i = 0; i < l; i++)
                             edge[i]=result.get("array").getAsJsonArray().get(i).getAsInt();
@@ -353,26 +376,44 @@ public class MainActivity extends AppCompatActivity {
 
                         path[i] = a;
 
-                        //draw path from source to V[i] to V[0] to destination i.e source to destination
                         final Path Path = new Path();
 
-                        Path.moveTo(xi*257, yi*257);
+                        Path.moveTo(xd, yd);
 
-                        for (int j = 0; j <= i; j++) {
-                            Path.lineTo((float) V[path[i - j]].x*257, (float) V[path[i - j]].y*257);
+                        for (int j = 0; j < i+1; j++) {
+                            Path.lineTo( (float) vx[path[j]] , (float) vy[path[j]]);
                         }
 
-                        Path.close();
+                        Path.lineTo(xid,yid);
 
                         CompositePathView.DrawablePath drawablePath = new CompositePathView.DrawablePath();
                         drawablePath.path = Path;
 
+                        DisplayMetrics metrics = getResources().getDisplayMetrics();
+
                         Paint p = new Paint();
+                        p.setColor(Color.BLUE);
                         p.setStyle(Paint.Style.STROKE);
                         drawablePath.paint = p;
+                        p.setShadowLayer(
+                                TypedValue.applyDimension( TypedValue.COMPLEX_UNIT_DIP, 4, metrics ),
+                                TypedValue.applyDimension( TypedValue.COMPLEX_UNIT_DIP, 2, metrics ),
+                                TypedValue.applyDimension( TypedValue.COMPLEX_UNIT_DIP, 2, metrics ),
+                                0x66000000
+                        );
+                        p.setStrokeWidth(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, metrics));
+                        p.setPathEffect(
+                                new CornerPathEffect(
+                                        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, metrics)
+                                )
+                        );
                         t.drawPath(drawablePath);
                     }
                 });
+    }
+
+    static double finddistance(float a, float b, double c, double d) {
+        return Math.abs(Math.sqrt(Math.pow(a - c, 2) + Math.pow(b - d, 2)));
     }
 
 }

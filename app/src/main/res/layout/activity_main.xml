@@ -19,63 +19,25 @@
     android:focusableInTouchMode="true"
     android:focusable="true">
 
-    <ToggleButton
-        android:id="@+id/btn_wifi"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_wifi"
-        android:checked="false"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
-
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/imageButton"
-        android:layout_below="@+id/btn_wifi"
-        android:layout_centerHorizontal="true" />
-
     <com.qozix.tileview.TileView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/tileView"
         android:layout_alignParentBottom="true"
-        android:layout_alignLeft="@+id/button"
-        android:layout_alignStart="@+id/button"
-        android:layout_alignTop="@+id/btn_wifi" />
+         />
 
-    <Button
-        style="@style/Base.Widget.AppCompat.Button.Borderless"
+    <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/button"
-        android:id="@+id/button"
-        android:visibility="gone"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
-
-   <Button
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
-       android:id="@+id/rb"
-       android:text="@string/RB"
-       android:layout_alignParentBottom="true"
-       android:layout_alignParentRight="true"
-       android:layout_alignParentEnd="true" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:text="@string/E1"
-        android:visibility="gone"
-        android:ems="10"
-        android:id="@+id/editText"
-        android:layout_alignTop="@+id/rb"
-        android:layout_toLeftOf="@+id/rb"
-        android:layout_toStartOf="@+id/rb" />
+        android:id="@+id/fb"
+        android:layout_gravity="bottom"
+        android:clickable="true"
+        android:src="@android:drawable/ic_menu_search"
+        android:layout_marginLeft="16dp"
+        android:background="#d787a2"
+        android:layout_alignBottom="@+id/tileView"
+        android:layout_alignRight="@+id/tileView"
+        android:layout_alignEnd="@+id/tileView" />
 
 </RelativeLayout>
 
