@@ -48,7 +48,8 @@ public class MainActivity extends AppCompatActivity {
     private double n;
     private float xid = 0, yid=0;
     final findpath f = new findpath();
-    String url="http://10.132.126.220:3000/";
+    String url="http://10.132.124.35:3000/";
+    int scancount=0;
 
     Timer T=new Timer();
     WifiManager wifiManager;
@@ -59,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
     FloatingActionButton fab;
     RadioGroup radioGroup;
     String S;
-
+    ImageView marker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,13 +70,14 @@ public class MainActivity extends AppCompatActivity {
 
         fab= (FloatingActionButton) findViewById(R.id.fb);
 
+
+
         fab.setOnClickListener(new View.OnClickListener() {
                                    @Override
                                    public void onClick(View v) {
-
-                                       setContentView(R.layout.fab);
-
                                        radioGroup = (RadioGroup) findViewById(R.id.myRadioGroup);
+                                       radioGroup.setVisibility(View.VISIBLE);
+                                       fab.setVisibility(View.GONE);
                                        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
                                            @Override
                                            public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -99,8 +101,9 @@ public class MainActivity extends AppCompatActivity {
                                        B1.setOnClickListener(new View.OnClickListener() {
                                            @Override
                                            public void onClick(View v) {
-                                               setContentView(R.layout.activity_main);
+                                               radioGroup.setVisibility(View.GONE);
                                                findloc(S);
+                                               fab.setVisibility(View.VISIBLE);
                                            }
                                        });
                                    }
@@ -125,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 scanning();
             }
-        }, 0,10000);
+        }, 10000,30000);
 
         f.floor = "b2f2";
 
@@ -251,7 +254,11 @@ public class MainActivity extends AppCompatActivity {
                                 yid = 236 * Math.abs(result.get("xi").getAsFloat());
                                 xid = 236 * Math.abs(result.get("yi").getAsFloat());
 
-                                mark((double) xid, (double) yid, "S");
+
+                                mark((double)xid, (double)yid);
+                                findloc(S);
+
+
                             }
                         }
                     }
@@ -277,25 +284,14 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
 
-                        mark(result.get("xco").getAsDouble(), result.get("yco").getAsDouble(), "D");
-                        findnode(xid, yid, result.get("xco").getAsFloat(), result.get("yco").getAsFloat());
 
+
+                        mark(result.get("xco").getAsDouble(),result.get("yco").getAsDouble());
+                        findnode(xid, yid, result.get("xco").getAsFloat(), result.get("yco").getAsFloat());
                     }
                 });
     }
 
-    @TargetApi(Build.VERSION_CODES.KITKAT)
-    private void mark(double x,double y, String c) {
-
-        ImageView marker = new ImageView(this);
-        marker.setImageResource(R.drawable.push_pin);
-        if(Objects.equals(c,"S")) {
-            t.addMarker(marker, x, y, -0.5f, -0.5f);
-        }
-
-        else
-            t.addMarker(marker, x, y, -0.5f, -0.5f);
-    }
 
     public void findnode(final float xs, final float ys, final float xd, final float yd) {
         Ion.with(this)
@@ -411,7 +407,11 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-
+ void mark(double x, double y) {
+     marker=new ImageView(this);
+     marker.setImageResource(R.drawable.push_pin);
+     t.addMarker(marker,x,y,-0.5f,-0.5f);
+ }
     static double finddistance(float a, float b, double c, double d) {
         return Math.abs(Math.sqrt(Math.pow(a - c, 2) + Math.pow(b - d, 2)));
     }
