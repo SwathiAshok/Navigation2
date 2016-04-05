@@ -44,12 +44,10 @@ public class MainActivity extends AppCompatActivity {
     private Values v = new Values();
     double[] vx=new double[31];
     double[] vy=new double[31];
-    private final double A = -32;
-    private double n;
     private float xid = 0, yid=0;
-    final findpath f = new findpath();
-    String url="http://10.132.124.35:3000/";
-    int scancount=0;
+    final find_path f = new find_path();
+    String url="http://10.132.124.143:3000/", S;
+    int scan_count=0, room_count=-1;
 
     Timer T=new Timer();
     WifiManager wifiManager;
@@ -59,8 +57,9 @@ public class MainActivity extends AppCompatActivity {
     TileView t;
     FloatingActionButton fab;
     RadioGroup radioGroup;
-    String S;
     ImageView marker;
+    View V,W;
+    CompositePathView.DrawablePath drawablePath = new CompositePathView.DrawablePath();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,72 +67,63 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        fab= (FloatingActionButton) findViewById(R.id.fb);
-
-
-
-        fab.setOnClickListener(new View.OnClickListener() {
-                                   @Override
-                                   public void onClick(View v) {
-                                       radioGroup = (RadioGroup) findViewById(R.id.myRadioGroup);
-                                       radioGroup.setVisibility(View.VISIBLE);
-                                       fab.setVisibility(View.GONE);
-                                       radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-                                           @Override
-                                           public void onCheckedChanged(RadioGroup group, int checkedId) {
-                                               if (checkedId == R.id.radioButton)
-                                                   S="Maj";
-                                               else if(checkedId==R.id.radioButton2)
-                                                   S="Hal";
-                                               else if(checkedId==R.id.radioButton3)
-                                                   S="Fuj";
-                                               else if(checkedId==R.id.radioButton4)
-                                                   S="Ova";
-                                               else if(checkedId==R.id.radioButton5)
-                                                   S="Cub";
-                                               else
-                                                   S="Gla";
-
-                                           }
-                                       });
-
-                                       Button B1=(Button)findViewById(R.id.B1);
-                                       B1.setOnClickListener(new View.OnClickListener() {
-                                           @Override
-                                           public void onClick(View v) {
-                                               radioGroup.setVisibility(View.GONE);
-                                               findloc(S);
-                                               fab.setVisibility(View.VISIBLE);
-                                           }
-                                       });
-                                   }
-                               });
-
-
-
         t=(TileView)findViewById(R.id.tileView);
         t.setSize(getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels);
         t.addDetailLevel(1f, "b2f2.png", getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels);
 
-        listOfProvider=new ArrayList<>();
-
-        wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        receiverWifi = new WifiReceiver();
         ImageView marker = new ImageView(this);
         marker.setImageResource(R.drawable.push_pin);
 
+        fab= (FloatingActionButton) findViewById(R.id.fb);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                radioGroup = (RadioGroup) findViewById(R.id.myRadioGroup);
+                radioGroup.setVisibility(View.VISIBLE);
+                fab.setVisibility(View.GONE);
+                radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(RadioGroup group, int checkedId) {
+                        if (checkedId == R.id.radioButton) S = "Maj";
+                        else if (checkedId == R.id.radioButton2) S = "Hal";
+                        else if (checkedId == R.id.radioButton3) S = "Fuj";
+                        else if (checkedId == R.id.radioButton4) S = "Ova";
+                        else if (checkedId == R.id.radioButton5) S = "Cub";
+                        else S = "Gla";
+
+                    }
+                });
+
+                Button B1 = (Button) findViewById(R.id.B1);
+                B1.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        room_count++;
+                        radioGroup.setVisibility(View.GONE);
+                        findloc(S);
+                        fab.setVisibility(View.VISIBLE);
+                    }
+                });
+            }
+        });
+
+        listOfProvider=new ArrayList<>();
+        wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        receiverWifi = new WifiReceiver();
+
         scanning();
+
         T.schedule(new TimerTask() {
             @Override
             public void run() {
+                scan_count++;
                 scanning();
             }
-        }, 10000,30000);
+        }, 3000,3000); //ReScan every 3 secs
 
         f.floor = "b2f2";
 
         wifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
-
     }
 
     private void scanning() {
@@ -152,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
     }
 
-   class WifiReceiver extends BroadcastReceiver {
+    class WifiReceiver extends BroadcastReceiver {
 
         // This method is called when number of wifi connections is changed
         @TargetApi(Build.VERSION_CODES.KITKAT)
@@ -193,11 +183,11 @@ public class MainActivity extends AppCompatActivity {
                         v.RSSI[i] = sortedMap.get("twdata").get(i).level;
                     }
 
+                    double n, a = -32;
                     if (v.RSSI[i] > -50) n = 2;
                     else n = 2.5;
-                    v.d[i] = 0.14 * Math.pow(10, ((A - v.RSSI[i]) / (10 * n)));
+                    v.d[i] = 0.14 * Math.pow(10, ((a - v.RSSI[i]) / (10 * n)));
                     xyfrombssid(v.BSSID[i], i);
-
                 }
             }
         }
@@ -205,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void xyfrombssid(String id, final int i) {
         String URL = url+"AP/"+id;
+
         Ion.with(this)
                 .load(URL)
                 .asJsonObject()
@@ -217,16 +208,12 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
 
-                        if (result.has("error")) {
-                            return;
-                        }
+                        if (result.has("error")) return;
 
                         v.x[i] = result.get("xco").getAsFloat();
                         v.y[i] = result.get("yco").getAsFloat();
 
-                        if (i == 2) {
-                            getres(); // Calculate co-ordinates based on d1,d2,d3; x1,x2,x3; y1,y2,y3
-                        }
+                        if (i == 2) getres(); // Calculate co-ordinates based on d1,d2,d3; x1,x2,x3; y1,y2,y3
                     }
                 });
     } //GET calls
@@ -247,18 +234,11 @@ public class MainActivity extends AppCompatActivity {
 
                         if (!Double.isNaN(result.get("xi").getAsDouble())) {
                             if (!Double.isNaN(result.get("yi").getAsDouble())) {
-//                                xid=183;
-//                                yid=1235;
-//                                mark(183,1235);
-//
                                 yid = 236 * Math.abs(result.get("xi").getAsFloat());
                                 xid = 236 * Math.abs(result.get("yi").getAsFloat());
 
-
-                                mark((double)xid, (double)yid);
+                                mark((double)xid, (double)yid, "S");
                                 findloc(S);
-
-
                             }
                         }
                     }
@@ -266,8 +246,8 @@ public class MainActivity extends AppCompatActivity {
     } //triangulation
 
     private void findloc(String s) {
-
         String URL = url+"LOC/" + s;
+
         Ion.with(this)
                 .load(URL)
                 .asJsonObject()
@@ -280,18 +260,13 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
 
-                        if (result.has("error")) {
-                            return;
-                        }
+                        if (result.has("error")) return;
 
-
-
-                        mark(result.get("xco").getAsDouble(),result.get("yco").getAsDouble());
+                        mark(result.get("xco").getAsDouble(),result.get("yco").getAsDouble(), "D");
                         findnode(xid, yid, result.get("xco").getAsFloat(), result.get("yco").getAsFloat());
                     }
                 });
     }
-
 
     public void findnode(final float xs, final float ys, final float xd, final float yd) {
         Ion.with(this)
@@ -312,7 +287,6 @@ public class MainActivity extends AppCompatActivity {
                             vy[i]= result.get("yco").getAsJsonArray().get(i).getAsDouble();
                         }
 
-
                         double nns, nnd;
                         int s = 0, d = 0;
 
@@ -323,10 +297,10 @@ public class MainActivity extends AppCompatActivity {
                                 s = i;
                             }
                         }
+
                         f.vertex = s;
 
                         nnd = finddistance(xd, yd, vx[0], vy[0]);
-                        d = 0;
                         for (int i = 1; i < 31; i++) {
                             if (nnd > finddistance(xd, yd, vx[i], vy[i])) {
                                 nnd = finddistance(xd, yd, vx[i], vy[i]);
@@ -338,7 +312,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
-
 
     void  path(final int s, final int d, final float xd, final float yd) {
         Ion.with(this)
@@ -354,16 +327,15 @@ public class MainActivity extends AppCompatActivity {
                             return;
                         }
 
-                        int l = 31;
+                        int l = 31, a = s, b = d, i;
+
                         int[] edge = new int[l];
-                        for (int i = 0; i < l; i++)
+                        for (i = 0; i < l; i++)
                             edge[i]=result.get("array").getAsJsonArray().get(i).getAsInt();
 
-
-                        int a = s, b = d, i = 1;
                         int[] path = new int[10];
-
                         path[0] = b;
+                        i=1;
 
                         while (edge[b] != -1) {
                             b = edge[b];
@@ -373,16 +345,15 @@ public class MainActivity extends AppCompatActivity {
                         path[i] = a;
 
                         final Path Path = new Path();
-
                         Path.moveTo(xd, yd);
-
                         for (int j = 0; j < i+1; j++) {
                             Path.lineTo( (float) vx[path[j]] , (float) vy[path[j]]);
                         }
-
                         Path.lineTo(xid,yid);
 
-                        CompositePathView.DrawablePath drawablePath = new CompositePathView.DrawablePath();
+                        if(scan_count!=0)
+                            t.removePath(drawablePath);
+
                         drawablePath.path = Path;
 
                         DisplayMetrics metrics = getResources().getDisplayMetrics();
@@ -392,9 +363,9 @@ public class MainActivity extends AppCompatActivity {
                         p.setStyle(Paint.Style.STROKE);
                         drawablePath.paint = p;
                         p.setShadowLayer(
-                                TypedValue.applyDimension( TypedValue.COMPLEX_UNIT_DIP, 4, metrics ),
-                                TypedValue.applyDimension( TypedValue.COMPLEX_UNIT_DIP, 2, metrics ),
-                                TypedValue.applyDimension( TypedValue.COMPLEX_UNIT_DIP, 2, metrics ),
+                                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, metrics),
+                                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, metrics),
+                                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, metrics),
                                 0x66000000
                         );
                         p.setStrokeWidth(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, metrics));
@@ -403,17 +374,35 @@ public class MainActivity extends AppCompatActivity {
                                         TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, metrics)
                                 )
                         );
-                        t.drawPath(drawablePath);
+
+                         t.drawPath(drawablePath);
                     }
                 });
     }
- void mark(double x, double y) {
-     marker=new ImageView(this);
-     marker.setImageResource(R.drawable.push_pin);
-     t.addMarker(marker,x,y,-0.5f,-0.5f);
- }
+
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    void mark(double x, double y, String s) {
+        marker=new ImageView(this);
+        marker.setImageResource(R.drawable.push_pin);
+
+        if(Objects.equals(s, "S")) {
+            if (scan_count == 0) V = t.addMarker(marker, x, y, -0.5f, -0.5f);
+            else {
+                t.removeMarker(V);
+                V = t.addMarker(marker, x, y, -0.5f, -0.5f);
+            }
+        }
+
+        else {
+            if (room_count == 0) W = t.addMarker(marker, x, y, -0.5f, -0.5f);
+            else {
+                t.removeMarker(W);
+                W = t.addMarker(marker, x, y, -0.5f, -0.5f);
+            }
+        }
+    }
+
     static double finddistance(float a, float b, double c, double d) {
         return Math.abs(Math.sqrt(Math.pow(a - c, 2) + Math.pow(b - d, 2)));
     }
-
 }
