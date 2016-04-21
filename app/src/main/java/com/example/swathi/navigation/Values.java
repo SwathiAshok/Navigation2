@@ -15,5 +15,8 @@ public class Values {
         @Expose
         float[] y = new float[3];
 
+        @Expose
+        double[] z = new double[3];
+
         int[] RSSI=new int[3];
 }

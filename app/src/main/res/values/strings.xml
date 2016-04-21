@@ -1,5 +1,5 @@
 <resources>>
-    <string name="app_name">Navigation</string>
+    <string name="app_name">IntNav</string>
     <string name="action_settings">Settings</string>
     <string name="button">OK</string>
     <string name="cb">GO</string>
@@ -13,4 +13,5 @@
     <string name="Fujian">Fujian Tulou</string>
     <string name="Half">Half Dome</string>
     <string name="OK">OK</string>
+    <string name="Floor">Different Floor</string>
 </resources>

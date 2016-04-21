@@ -45,8 +45,9 @@ public class MainActivity extends AppCompatActivity {
     double[] vx=new double[31];
     double[] vy=new double[31];
     private float xid = 0, yid=0;
+    double zid= 2.2;
     final find_path f = new find_path();
-    String url="http://10.132.124.143:3000/", S;
+    String url="http://10.132.124.115:3000/", S;
     int scan_count=0, room_count=-1;
 
     Timer T=new Timer();
@@ -89,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
                         else if (checkedId == R.id.radioButton3) S = "Fuj";
                         else if (checkedId == R.id.radioButton4) S = "Ova";
                         else if (checkedId == R.id.radioButton5) S = "Cub";
+                        else if (checkedId == R.id.radioButton6) S = "Flo";
                         else S = "Gla";
 
                     }
@@ -119,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
                 scan_count++;
                 scanning();
             }
-        }, 3000,3000); //ReScan every 3 secs
+        }, 5000,5000); //ReScan every 5 secs
 
         f.floor = "b2f2";
 
@@ -167,21 +169,32 @@ public class MainActivity extends AppCompatActivity {
             });
 
             listOfProvider.clear();
+            if(sortedMap.get("twdata").size() < 2)
+            Toast.makeText(getApplicationContext(), "Too few APs available", Toast.LENGTH_LONG).show();
 
-            if (sortedMap.get("twdata").size() < 3) {
-                Toast.makeText(getApplicationContext(), "Too few APs available", Toast.LENGTH_LONG).show();
-            } else {
+            else if (sortedMap.get("twdata").size() == 2) {
+                for (int i = 0; i < 2; i++) {
+
+                    v.BSSID[i] = sortedMap.get("twdata").get(i).BSSID;
+                    v.RSSI[i] = sortedMap.get("twdata").get(i).level;
+
+                    double n, a = -32;
+                    if (v.RSSI[i] > -50) n = 2;
+                    else n = 2.5;
+                    v.d[i] = 0.14 * Math.pow(10, ((a - v.RSSI[i]) / (10 * n)));
+                    xyfrombssid(v.BSSID[i], i);
+                }
+                v.x[2]=v.y[2]=0;
+                v.d[2]=(finddistance(0,0,v.x[0],v.y[0])+finddistance(0,0,v.x[1],v.y[1]))/2;
+                getres();
+
+            }
+            else {
                 for (int i = 0; i < 3; i++) {
 
-                    if(Objects.equals(sortedMap.get("twdata").get(i).BSSID, "d8:b1:90:b2:ba:20")) {
-                        v.BSSID[i] = sortedMap.get("twdata").get(4).BSSID;
-                        v.RSSI[i] = sortedMap.get("twdata").get(4).level;
-                    }
+                    v.BSSID[i] = sortedMap.get("twdata").get(i).BSSID;
+                    v.RSSI[i] = sortedMap.get("twdata").get(i).level;
 
-                    else {
-                        v.BSSID[i] = sortedMap.get("twdata").get(i).BSSID;
-                        v.RSSI[i] = sortedMap.get("twdata").get(i).level;
-                    }
 
                     double n, a = -32;
                     if (v.RSSI[i] > -50) n = 2;
@@ -212,6 +225,7 @@ public class MainActivity extends AppCompatActivity {
 
                         v.x[i] = result.get("xco").getAsFloat();
                         v.y[i] = result.get("yco").getAsFloat();
+                        v.z[i] = result.get("zco").getAsDouble();
 
                         if (i == 2) getres(); // Calculate co-ordinates based on d1,d2,d3; x1,x2,x3; y1,y2,y3
                     }
@@ -234,8 +248,14 @@ public class MainActivity extends AppCompatActivity {
 
                         if (!Double.isNaN(result.get("xi").getAsDouble())) {
                             if (!Double.isNaN(result.get("yi").getAsDouble())) {
-                                yid = 236 * Math.abs(result.get("xi").getAsFloat());
-                                xid = 236 * Math.abs(result.get("yi").getAsFloat());
+
+                                if(v.z[0]==v.z[1]) zid=v.z[0];
+                                else if(v.z[0]==v.z[2]) zid=v.z[0];
+                                else if(v.z[1]==v.z[2]) zid=v.z[1];
+                                else Toast.makeText(getApplicationContext(),"Error",Toast.LENGTH_LONG);
+
+                                yid = 246 * Math.abs(result.get("xi").getAsFloat());
+                                xid = 122 * Math.abs(result.get("yi").getAsFloat());
 
                                 mark((double)xid, (double)yid, "S");
                                 findloc(S);
@@ -262,13 +282,20 @@ public class MainActivity extends AppCompatActivity {
 
                         if (result.has("error")) return;
 
-                        mark(result.get("xco").getAsDouble(),result.get("yco").getAsDouble(), "D");
-                        findnode(xid, yid, result.get("xco").getAsFloat(), result.get("yco").getAsFloat());
+                        if (zid == result.get("zco").getAsDouble()) {
+                            mark(result.get("xco").getAsDouble(), result.get("yco").getAsDouble(), "D");
+                            pathfinder(xid, yid, result.get("xco").getAsFloat(), result.get("yco").getAsFloat());
+                        }
+
+                        else {
+                            mark(result.get("stairx").getAsDouble(), result.get("stairy").getAsDouble(), "D");
+                            pathfinder(xid, yid, result.get("stairx").getAsFloat(), result.get("stairy").getAsFloat());
+                        }
                     }
                 });
     }
 
-    public void findnode(final float xs, final float ys, final float xd, final float yd) {
+    public void pathfinder(final float xs, final float ys, final float xd, final float yd) {
         Ion.with(this)
                 .load(url + "VCO")
                 .setJsonPojoBody(f)
@@ -375,7 +402,7 @@ public class MainActivity extends AppCompatActivity {
                                 )
                         );
 
-                         t.drawPath(drawablePath);
+                        t.drawPath(drawablePath);
                     }
                 });
     }
@@ -386,19 +413,13 @@ public class MainActivity extends AppCompatActivity {
         marker.setImageResource(R.drawable.push_pin);
 
         if(Objects.equals(s, "S")) {
-            if (scan_count == 0) V = t.addMarker(marker, x, y, -0.5f, -0.5f);
-            else {
-                t.removeMarker(V);
-                V = t.addMarker(marker, x, y, -0.5f, -0.5f);
-            }
+            t.removeMarker(V);
+            V = t.addMarker(marker, x, y, -0.5f, -0.5f);
         }
 
         else {
-            if (room_count == 0) W = t.addMarker(marker, x, y, -0.5f, -0.5f);
-            else {
-                t.removeMarker(W);
-                W = t.addMarker(marker, x, y, -0.5f, -0.5f);
-            }
+            t.removeMarker(W);
+            W = t.addMarker(marker, x, y, -0.5f, -0.5f);
         }
     }
 

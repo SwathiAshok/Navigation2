@@ -44,15 +44,16 @@
         android:id="@+id/myRadioGroup"
         android:background="#ffffff"
         android:checkedButton="@+id/sound"
-        android:layout_centerHorizontal="true"
-        android:visibility="gone">
+        android:visibility="gone"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true">
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/Majestic"
             android:id="@+id/radioButton"
-            android:layout_marginTop="100dp"
+
             android:textColor="#000000" />
 
         <RadioButton
@@ -87,14 +88,23 @@
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/GlaciarBay"
+            android:text="@string/Floor"
             android:id="@+id/radioButton6"
             android:checked="false"
             android:textColor="#000000" />
 
-        <Button
+        <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="@string/GlaciarBay"
+            android:id="@+id/radioButton7"
+            android:checked="false"
+            android:textColor="#000000" />
+
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="37dp"
             android:id="@+id/B1"
             android:text="@string/OK"
             android:layout_marginTop="52dp"
