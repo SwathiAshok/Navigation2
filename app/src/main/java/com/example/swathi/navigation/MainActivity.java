@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private float xid = 0, yid=0;
     double zid= 2.2;
     final find_path f = new find_path();
-    String url="http://10.132.124.115:3000/", S;
+    String url="http://10.132.124.50:3000/", S;
     int scan_count=0, room_count=-1;
 
     Timer T=new Timer();
@@ -169,26 +169,37 @@ public class MainActivity extends AppCompatActivity {
             });
 
             listOfProvider.clear();
-            if(sortedMap.get("twdata").size() < 2)
-            Toast.makeText(getApplicationContext(), "Too few APs available", Toast.LENGTH_LONG).show();
-
-            else if (sortedMap.get("twdata").size() == 2) {
-                for (int i = 0; i < 2; i++) {
-
-                    v.BSSID[i] = sortedMap.get("twdata").get(i).BSSID;
-                    v.RSSI[i] = sortedMap.get("twdata").get(i).level;
-
-                    double n, a = -32;
-                    if (v.RSSI[i] > -50) n = 2;
-                    else n = 2.5;
-                    v.d[i] = 0.14 * Math.pow(10, ((a - v.RSSI[i]) / (10 * n)));
-                    xyfrombssid(v.BSSID[i], i);
-                }
-                v.x[2]=v.y[2]=0;
-                v.d[2]=(finddistance(0,0,v.x[0],v.y[0])+finddistance(0,0,v.x[1],v.y[1]))/2;
-                getres();
-
+            if(sortedMap.get("twdata").size() < 2) {
+                Toast.makeText(getApplicationContext(), "Too few APs available", Toast.LENGTH_LONG).show();
             }
+//            else if (sortedMap.get("twdata").size() == 2) {
+//                for (int i = 0; i < 2; i++) {
+//
+//                    v.BSSID[i] = sortedMap.get("twdata").get(i).BSSID;
+//                    v.RSSI[i] = sortedMap.get("twdata").get(i).level;
+//
+//                    double n, a = -32;
+//                    if (v.RSSI[i] > -50) n = 2;
+//                    else n = 2.5;
+//                    v.d[i] = 0.14 * Math.pow(10, ((a - v.RSSI[i]) / (10 * n)));
+//                    xyfrombssid(v.BSSID[i], i);
+//                }
+//                v.x[2]=v.y[2]=0;
+//                if(v.RSSI[0]>v.RSSI[1]) {
+//                    if(finddistance(0,0,v.x[0],v.y[0])>finddistance(0,0,v.x[1],v.y[1]))
+//                        v.d[2]=finddistance(0,0,v.x[0],v.y[0])+v.d[0];
+//                    else
+//                        v.d[2]=finddistance(0,0,v.x[0],v.y[0])-v.d[0];
+//                }
+//                else {
+//                    if(finddistance(0,0,v.x[1],v.y[1])>finddistance(0,0,v.x[0],v.y[0]))
+//                        v.d[2]=finddistance(0,0,v.x[1],v.y[1])+v.d[1];
+//                    else
+//                        v.d[2]=finddistance(0,0,v.x[1],v.y[1])-v.d[1];
+//                }
+//
+//                getres();
+//            }
             else {
                 for (int i = 0; i < 3; i++) {
 
